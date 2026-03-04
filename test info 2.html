@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Informatique Bureautique - HALLAL SERVICES TECH</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Ajout du SDK EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(to right, #2c3e50, #4a6fa5);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logo {
+            max-width: 180px;
+            height: auto;
+        }
+
+        .timer-container {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #34495e;
+        }
+
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .timer i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            margin-left: 20px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: #34495e;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+        .quiz-content {
+            padding: 30px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .question-container {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            border-left: 5px solid #4a6fa5;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .question-number {
+            font-weight: bold;
+            color: #4a6fa5;
+            margin-bottom: 10px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .question-number i {
+            margin-right: 8px;
+        }
+
+        .question-text {
+            margin-bottom: 15px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 12px 15px;
+            background-color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            background-color: #edf2f7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .option.selected {
+            background-color: #e3f2fd;
+            border-color: #4a6fa5;
+        }
+
+        .option input {
+            margin-right: 10px;
+        }
+
+        .controls {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            background-color: #f1f5f9;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-next {
+            background-color: #4a6fa5;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background-color: #3a5a80;
+        }
+
+        .btn-submit {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background-color: #218838;
+        }
+
+        .btn-terminer {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-terminer:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-email {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-email:hover {
+            background-color: #138496;
+        }
+
+        .email-form {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            text-align: left;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .name-fields {
+            display: flex;
+            gap: 15px;
+        }
+
+        .name-fields .form-group {
+            flex: 1;
+        }
+
+        .time-warning {
+            color: #e74c3c;
+            animation: pulse 1s infinite;
+        }
+
+        .completion-message {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+
+        .completion-icon {
+            font-size: 80px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .completion-text {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .name-fields {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        .true-false-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .true-false-option {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: white;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .true-false-option.selected {
+            background-color: #e3f2fd;
+            border-color: #4a6fa5;
+        }
+
+        .question-counter {
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #4a6fa5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Styles pour les messages d'état d'envoi */
+        .sending-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #17a2b8;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #28a745;
+        }
+
+        .error-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #e74c3c;
+        }
+
+        .fallback-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #17a2b8;
+            margin-top: 15px;
+        }
+        
+        .email-validation {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .name-validation {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="https://i.ibb.co/hFJm4Lx2/logo-hallal.png" alt="Logo HALLAL SERVICES TECH" class="logo">
+            </div>
+            <h1>HALLAL SERVICES TECH</h1>
+            <p>Testez vos connaissances en informatique bureautique et générale</p>
+        </div>
+        
+        <div class="timer-container">
+            <div class="timer">
+                <i class="fas fa-clock"></i>
+                <span id="timer">40:00</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quiz-content" id="quiz-content">
+            <!-- Les questions seront générées dynamiquement par JavaScript -->
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-terminer" id="terminer-btn">
+                <i class="fas fa-stop"></i> Terminer le quiz
+            </button>
+            <button class="btn btn-next" id="next-btn">
+                Question suivante <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+        
+        <div class="completion-message" id="completion-message">
+            <div class="completion-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="completion-text">
+                Quiz terminé ! Vos résultats seront envoyés par email.
+            </div>
+            <p>Merci d'avoir participé au quiz. Veuillez entrer vos coordonnées ci-dessous pour recevoir vos résultats et la correction complète.</p>
+        </div>
+        
+        <div class="email-form" id="email-form">
+            <h3><i class="fas fa-envelope"></i> Recevoir les résultats par email</h3>
+            <p>Entrez vos coordonnées pour recevoir votre note et la correction complète</p>
+            
+            <div class="name-fields">
+                <div class="form-group">
+                    <label for="user-firstname">Votre prénom:</label>
+                    <input type="text" id="user-firstname" placeholder="Votre prénom" required>
+                    <div class="name-validation" id="firstname-validation">Veuillez entrer votre prénom</div>
+                </div>
+                <div class="form-group">
+                    <label for="user-lastname">Votre nom:</label>
+                    <input type="text" id="user-lastname" placeholder="Votre nom" required>
+                    <div class="name-validation" id="lastname-validation">Veuillez entrer votre nom</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="user-email">Votre adresse email:</label>
+                <input type="email" id="user-email" placeholder="votre@email.com" required>
+                <div class="email-validation" id="email-validation">Veuillez entrer une adresse email valide</div>
+            </div>
+            
+            <button class="btn btn-email" id="send-email-btn">
+                <i class="fas fa-paper-plane"></i> Envoyer les résultats
+            </button>
+            <button class="btn btn-submit" id="restart-btn" style="margin-top: 10px;">
+                <i class="fas fa-redo"></i> Recommencer le quiz
+            </button>
+            
+            <!-- Messages d'état d'envoi -->
+            <div class="sending-message" id="sending-message">
+                <i class="fas fa-spinner fa-spin"></i> Envoi en cours...
+            </div>
+            <div class="success-message" id="success-message">
+                <i class="fas fa-check-circle"></i> Résultats envoyés avec succès !
+            </div>
+            <div class="error-message" id="error-message">
+                <i class="fas fa-exclamation-triangle"></i> Erreur lors de l'envoi. Veuillez réessayer.
+            </div>
+            <div class="fallback-message" id="fallback-message">
+                <p><i class="fas fa-info-circle"></i> Si l'envoi automatique ne fonctionne pas, vous pouvez copier vos résultats ci-dessous :</p>
+                <textarea id="results-text" rows="10" style="width: 100%; margin-top: 10px; padding: 10px;"></textarea>
+                <button class="btn btn-email" id="copy-results-btn" style="margin-top: 10px;">
+                    <i class="fas fa-copy"></i> Copier les résultats
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Questions du quiz organisées par catégories (50 questions)
+        const questions = [
+            // Catégorie 1: Importance de l'informatique (4 questions)
+            {
+                question: "L'informatique est importante car elle permet d'automatiser des tâches répétitives.",
+                type: "truefalse",
+                correct: true,
+                explanation: "L'automatisation des tâches répétitives est l'un des principaux avantages de l'informatique, permettant un gain de temps et une réduction des erreurs.",
+                category: "Importance de l'informatique"
+            },
+            {
+                question: "Quelle est l'importance de l'informatique dans le monde moderne?",
+                type: "multiple",
+                options: [
+                    "Elle permet d'automatiser des tâches répétitives",
+                    "Elle facilite la communication et le partage d'informations",
+                    "Elle améliore la productivité dans tous les secteurs",
+                    "Elle n'est utile que pour les informaticiens"
+                ],
+                correct: [0, 1, 2],
+                explanation: "L'informatique a révolutionné tous les secteurs d'activité, pas seulement le domaine informatique. Elle facilite la communication, améliore la productivité et permet l'automatisation.",
+                category: "Importance de l'informatique"
+            },
+            {
+                question: "L'informatique n'a pas transformé la manière dont nous communiquons.",
+                type: "truefalse",
+                correct: false,
+                explanation: "L'informatique a radicalement transformé la communication avec l'email, les messageries instantanées, les réseaux sociaux et les appels vidéo.",
+                category: "Importance de l'informatique"
+            },
+            {
+                question: "Pourquoi la maîtrise de l'informatique est-elle importante pour les citoyens?",
+                type: "multiple",
+                options: [
+                    "Pour participer activement à la société numérique",
+                    "Pour accéder aux services en ligne",
+                    "Pour protéger ses données personnelles",
+                    "Seulement pour trouver un emploi"
+                ],
+                correct: [0, 1, 2],
+                explanation: "La maîtrise de l'informatique est essentielle pour participer à la société numérique, accéder aux services et protéger sa vie privée en ligne.",
+                category: "Importance de l'informatique"
+            },
+            
+            // Catégorie 2: Définition et composants de l'ordinateur (6 questions)
+            {
+                question: "Un ordinateur est une machine qui ne peut que traiter du texte.",
+                type: "truefalse",
+                correct: false,
+                explanation: "Un ordinateur peut traiter divers types de données : texte, images, sons, vidéos, et exécuter des programmes complexes.",
+                category: "Composants de l'ordinateur"
+            },
+            {
+                question: "Quel est le rôle principal du processeur (CPU)?",
+                options: [
+                    "Exécuter les instructions des programmes",
+                    "Stocker les données temporairement",
+                    "Afficher les informations à l'écran",
+                    "Gérer l'alimentation électrique"
+                ],
+                correct: 0,
+                explanation: "Le processeur (CPU) est le cerveau de l'ordinateur qui exécute les instructions des programmes.",
+                category: "Composants de l'ordinateer"
+            },
+            {
+                question: "La RAM est une mémoire de stockage permanent.",
+                type: "truefalse",
+                correct: false,
+                explanation: "La RAM (Random Access Memory) est une mémoire volatile qui perd son contenu quand l'ordinateur est éteint. C'est le disque dur qui stocke les données de façon permanente.",
+                category: "Composants de l'ordinateur"
+            },
+            {
+                question: "Quels sont les composants principaux d'un ordinateur?",
+                type: "multiple",
+                options: [
+                    "Processeur (CPU)",
+                    "Mémoire RAM",
+                    "Disque dur",
+                    "Clavier et souris uniquement"
+                ],
+                correct: [0, 1, 2],
+                explanation: "Les composants principaux d'un ordinateur sont le processeur, la mémoire RAM et le disque dur. Le clavier et la souris sont des périphériques d'entrée.",
+                category: "Composants de l'ordinateur"
+            },
+            {
+                question: "Un système d'exploitation est un programme qui gère les ressources matérielles.",
+                type: "truefalse",
+                correct: true,
+                explanation: "Le système d'exploitation (Windows, macOS, Linux) gère les ressources matérielles et fournit une interface pour exécuter des applications.",
+                category: "Composants de l'ordinateur"
+            },
+            {
+                question: "Quelle est la différence entre logiciel et matériel?",
+                options: [
+                    "Le matériel est physique, le logiciel est intangible",
+                    "Le matériel exécute, le logiciel donne les instructions",
+                    "Ils sont identiques",
+                    "Le logiciel est plus cher que le matériel"
+                ],
+                correct: 0,
+                explanation: "Le matériel désigne les composants physiques de l'ordinateur, tandis que le logiciel représente les programmes et données.",
+                category: "Composants de l'ordinateur"
+            },
+            
+            // Catégorie 3: Word et manipulations bureautiques (10 questions)
+            {
+                question: "Dans Word, le raccourci Ctrl+S permet de sauvegarder un document.",
+                type: "truefalse",
+                correct: true,
+                explanation: "Ctrl+S est le raccourci universel pour sauvegarder un document dans la plupart des applications, y compris Word.",
+                category: "Traitement de texte (Word)"
+            },
+            {
+                question: "Quels sont les raccourcis clavier utiles dans Word?",
+                type: "multiple",
+                options: [
+                    "Ctrl+C pour copier",
+                    "Ctrl+V pour coller",
+                    "Ctrl+Z pour annuler",
+                    "Ctrl+Y pour rétablir"
+                ],
+                correct: [0, 1, 2, 3],
+                explanation: "Ces raccourcis sont standards dans la plupart des applications Windows et sont essentiels pour une utilisation efficace de Word.",
+                category: "Traitement de texte (Word)"
+            },
+            {
+                question: "Le format PDF préserve la mise en forme d'un document.",
+                type: "truefalse",
+                correct: true,
+                explanation: "Le format PDF (Portable Document Format) préserve la mise en forme quel que soit l'appareil ou le logiciel utilisé pour l'ouvrir.",
+                category: "Traitement de texte (Word)"
+            },
+            {
+                question: "Comment peut-on modifier la mise en forme dans Word?",
+                type: "multiple",
+                options: [
+                    "Utiliser l'onglet Accueil pour la police",
+                    "Utiliser l'onglet Mise en page pour les marges",
+                    "Utiliser les styles prédéfinis",
+                    "Il est impossible de modifier la mise en forme"
+                ],
+                correct: [0, 1, 2],
+                explanation: "Word offre de nombreuses options de mise en forme via les onglets Accueil et Mise en page, ainsi que des styles prédéfinis pour une mise en forme cohérente.",
+                category: "Traitement de texte (Word)"
+            },
+            {
+                question: "La fonction 'Rechercher et Remplacer' permet de traduire un document.",
+                type: "truefalse",
+                correct: false,
+                explanation: "La fonction 'Rechercher et Remplacer' permet de trouver et remplacer du texte dans un document, pas de le traduire.",
+                category: "Traitement de texte (Word)"
+            },
+            {
+                question: "Quelle est la fonction de l'onglet Insertion dans Word?",
+                options: [
+                    "Insérer des images, tableaux et autres éléments",
+                    "Modifier la police de caractères",
+                    "Changer les marges du document",
+                    "Vérifier l'orthographe"
+                ],
+                correct: 0,
+                explanation: "L'onglet Insertion permet d'ajouter divers éléments comme des images, tableaux, en-têtes, pieds de page, etc.",
+                category: "Traitement de texte (Word)"
+            },
+            {
+                question: "On ne peut pas insérer de tableaux dans un document Word.",
+                type: "truefalse",
+                correct: false,
+                explanation: "Word permet d'insérer et de formater des tableaux pour organiser des données.",
+                category: "Traitement de texte (Word)"
+            },
+            {
+                question: "Quelles sont les fonctionnalités de Word pour structurer un document?",
+                type: "multiple",
+                options: [
+                    "Les styles de titre et de paragraphe",
+                    "La table des matières automatique",
+                    "Les sauts de page et de section",
+                    "Word ne permet pas de structurer un document"
+                ],
+                correct: [0, 1, 2],
+                explanation: "Word offre de nombreuses fonctionnalités pour structurer un document : styles, tables des matières, sauts de page, etc.",
+                category: "Traitement de texte (Word)"
+            },
+            {
+                question: "L'aperçu avant impression permet de voir le document tel qu'il sera imprimé.",
+                type: "truefalse",
+                correct: true,
+                explanation: "L'aperçu avant impression montre exactement comment le document apparaîtra sur papier, ce qui permet d'éviter les mauvaises surprises.",
+                category: "Traitement de texte (Word)"
+            },
+            {
+                question: "Comment créer une liste à puces dans Word?",
+                options: [
+                    "Onglet Accueil > Puces",
+                    "Clic droit > Puces",
+                    "Taper * puis espace au début d'une ligne",
+                    "Toutes ces réponses"
+                ],
+                correct: 3,
+                explanation: "Il existe plusieurs méthodes pour créer une liste à puces dans Word, y compris celles mentionnées.",
+                category: "Traitement de texte (Word)"
+            },
+            
+            // Catégorie 4: Excel (6 questions)
+            {
+                question: "Excel est un logiciel de traitement de texte.",
+                type: "truefalse",
+                correct: false,
+                explanation: "Excel est un tableur utilisé pour les calculs et l'analyse de données, pas pour le traitement de texte.",
+                category: "Tableur (Excel)"
+            },
+            {
+                question: "Quelle est la fonction principale d'Excel?",
+                options: [
+                    "Effectuer des calculs sur des données organisées en tableaux",
+                    "Créer des documents textuels",
+                    "Présenter des diapositives",
+                    "Gérer des bases de données complexes"
+                ],
+                correct: 0,
+                explanation: "Excel est principalement utilisé pour effectuer des calculs sur des données organisées en tableaux.",
+                category: "Tableur (Excel)"
+            },
+            {
+                question: "La fonction SOMME() dans Excel permet d'additionner des valeurs.",
+                type: "truefalse",
+                correct: true,
+                explanation: "La fonction SOMME() est l'une des fonctions les plus utilisées dans Excel pour additionner une plage de cellules.",
+                category: "Tableur (Excel)"
+            },
+            {
+                question: "Quelles sont les fonctions de calcul de base dans Excel?",
+                type: "multiple",
+                options: [
+                    "SOMME() pour l'addition",
+                    "MOYENNE() pour la moyenne",
+                    "MIN() et MAX() pour les valeurs extrêmes",
+                    "TEXTE() pour formater du texte"
+                ],
+                correct: [0, 1, 2],
+                explanation: "SOMME(), MOYENNE(), MIN() et MAX() sont des fonctions de calcul de base. TEXTE() sert à formater du texte.",
+                category: "Tableur (Excel)"
+            },
+            {
+                question: "Un graphique dans Excel ne peut pas être modifié après sa création.",
+                type: "truefalse",
+                correct: false,
+                explanation: "Les graphiques dans Excel peuvent être modifiés à tout moment : type de graphique, couleurs, titres, etc.",
+                category: "Tableur (Excel)"
+            },
+            {
+                question: "Comment sélectionner toutes les cellules d'une feuille Excel?",
+                options: [
+                    "Ctrl+A",
+                    "Cliquer sur le triangle en haut à gauche de la feuille",
+                    "Ctrl+Espace",
+                    "Les deux premières réponses"
+                ],
+                correct: 3,
+                explanation: "On peut sélectionner toutes les cellules d'une feuille Excel avec Ctrl+A ou en cliquant sur le triangle en haut à gauche.",
+                category: "Tableur (Excel)"
+            },
+            
+            // Catégorie 5: PowerPoint (6 questions)
+            {
+                question: "PowerPoint est utilisé pour créer des présentations.",
+                type: "truefalse",
+                correct: true,
+                explanation: "PowerPoint est un logiciel de présentation permettant de créer des diaporamas.",
+                category: "Présentations (PowerPoint)"
+            },
+            {
+                question: "Quels éléments peut-on insérer dans une diapositive PowerPoint?",
+                type: "multiple",
+                options: [
+                    "Texte et images",
+                    "Graphiques et tableaux",
+                    "Vidéo et audio",
+                    "Formes et SmartArt"
+                ],
+                correct: [0, 1, 2, 3],
+                explanation: "PowerPoint permet d'insérer une grande variété d'éléments multimédias pour enrichir les présentations.",
+                category: "Présentations (PowerPoint)"
+            },
+            {
+                question: "Les transitions s'appliquent entre les diapositives.",
+                type: "truefalse",
+                correct: true,
+                explanation: "Les transitions sont des effets visuels qui se produisent lors du passage d'une diapositive à une autre.",
+                category: "Présentations (PowerPoint)"
+            },
+            {
+                question: "Comment démarrer un diaporama dans PowerPoint?",
+                options: [
+                    "Appuyer sur F5",
+                    "Onglet Diaporama > À partir du début",
+                    "Cliquer sur l'icône Diaporama en bas à droite",
+                    "Toutes ces réponses"
+                ],
+                correct: 3,
+                explanation: "Il existe plusieurs méthodes pour démarrer un diaporama dans PowerPoint, y compris celles mentionnées.",
+                category: "Présentations (PowerPoint)"
+            },
+            {
+                question: "On ne peut pas ajouter d'animations aux éléments d'une diapositive.",
+                type: "truefalse",
+                correct: false,
+                explanation: "PowerPoint permet d'ajouter des animations aux éléments individuels d'une diapositive (texte, images, etc.).",
+                category: "Présentations (PowerPoint)"
+            },
+            {
+                question: "Quelle est la fonction du masque des diapositives?",
+                options: [
+                    "Appliquer une mise en forme cohérente à toutes les diapositives",
+                    "Masquer certaines diapositives",
+                    "Créer des animations complexes",
+                    "Protéger la présentation par un mot de passe"
+                ],
+                correct: 0,
+                explanation: "Le masque des diapositives permet de définir une mise en forme cohérente pour l'ensemble de la présentation.",
+                category: "Présentations (PowerPoint)"
+            },
+            
+            // Catégorie 6: Raccourcis Windows et manipulation (6 questions)
+            {
+                question: "Le raccourci Windows + E ouvre l'Explorateur de fichiers.",
+                type: "truefalse",
+                correct: true,
+                explanation: "Windows + E est le raccourci universel pour ouvrir l'Explorateur de fichiers dans Windows.",
+                category: "Système d'exploitation (Windows)"
+            },
+            {
+                question: "Quels sont les raccourcis Windows utiles?",
+                type: "multiple",
+                options: [
+                    "Windows + D pour afficher le bureau",
+                    "Alt + Tab pour basculer entre les applications",
+                    "Ctrl + Shift + Esc pour le Gestionnaire des tâches",
+                    "Windows + L pour verrouiller la session"
+                ],
+                correct: [0, 1, 2, 3],
+                explanation: "Ces raccourcis sont très utiles pour une utilisation efficace de Windows.",
+                category: "Système d'exploitation (Windows)"
+            },
+            {
+                question: "Il est impossible de personnaliser le menu Démarrer de Windows.",
+                type: "truefalse",
+                correct: false,
+                explanation: "Le menu Démarrer de Windows peut être personnalisé en épinglant des applications, en redimensionnant, etc.",
+                category: "Système d'exploitation (Windows)"
+            },
+            {
+                question: "Comment créer un nouveau dossier dans l'Explorateur Windows?",
+                options: [
+                    "Ctrl + Shift + N",
+                    "Clic droit > Nouveau > Dossier",
+                    "Menu Fichier > Nouveau > Dossier",
+                    "Toutes ces réponses"
+                ],
+                correct: 3,
+                explanation: "Il existe plusieurs méthodes pour créer un nouveau dossier dans l'Explorateur Windows.",
+                category: "Système d'exploitation (Windows)"
+            },
+            {
+                question: "La barre des tâches de Windows ne peut pas être personnalisée.",
+                type: "truefalse",
+                correct: false,
+                explanation: "La barre des tâches de Windows peut être personnalisée en épinglant des applications, en changeant sa position, etc.",
+                category: "Système d'exploitation (Windows)"
+            },
+            {
+                question: "Comment accéder aux paramètres système dans Windows?",
+                type: "multiple",
+                options: [
+                    "Windows + I",
+                    "Clic droit sur le menu Démarrer > Paramètres",
+                    "Via le Panneau de configuration",
+                    "Uniquement en redémarrant l'ordinateur"
+                ],
+                correct: [0, 1, 2],
+                explanation: "Il existe plusieurs méthodes pour accéder aux paramètres système dans Windows.",
+                category: "Système d'exploitation (Windows)"
+            },
+            
+            // Catégorie 7: Navigation sur Internet (6 questions)
+            {
+                question: "Un navigateur web est un logiciel pour accéder à Internet.",
+                type: "truefalse",
+                correct: true,
+                explanation: "Un navigateur web (Chrome, Firefox, Edge, Safari) permet d'accéder aux sites web sur Internet.",
+                category: "Navigation Internet"
+            },
+            {
+                question: "Quels sont les navigateurs web courants?",
+                type: "multiple",
+                options: [
+                    "Google Chrome",
+                    "Mozilla Firefox",
+                    "Microsoft Edge",
+                    "Safari"
+                ],
+                correct: [0, 1, 2, 3],
+                explanation: "Ces navigateurs sont parmi les plus populaires et utilisés dans le monde.",
+                category: "Navigation Internet"
+            },
+            {
+                question: "HTTPS signifie que la connexion à un site web est sécurisée.",
+                type: "truefalse",
+                correct: true,
+                explanation: "HTTPS (HyperText Transfer Protocol Secure) indique que la connexion entre le navigateur et le site web est chiffrée et sécurisée.",
+                category: "Navigation Internet"
+            },
+            {
+                question: "Comment ajouter un site web aux favoris?",
+                options: [
+                    "Cliquer sur l'étoile dans la barre d'adresse",
+                    "Ctrl + D",
+                    "Menu Favoris > Ajouter aux favoris",
+                    "Toutes ces réponses"
+                ],
+                correct: 3,
+                explanation: "Il existe plusieurs méthodes pour ajouter un site web aux favoris selon le navigateur utilisé.",
+                category: "Navigation Internet"
+            },
+            {
+                question: "Les cookies sont toujours dangereux pour la sécurité.",
+                type: "truefalse",
+                correct: false,
+                explanation: "Les cookies peuvent être utilisés à bon escient (mémoriser les préférences, maintenir les sessions) mais certains peuvent présenter des risques pour la vie privée.",
+                category: "Navigation Internet"
+            },
+            {
+                question: "Que peut-on faire pour améliorer la sécurité en ligne?",
+                type: "multiple",
+                options: [
+                    "Utiliser des mots de passe forts",
+                    "Éviter les réseaux Wi-Fi publics non sécurisés",
+                    "Mettre à jour régulièrement le navigateur",
+                    "Ne jamais utiliser Internet"
+                ],
+                correct: [0, 1, 2],
+                explanation: "Plusieurs bonnes pratiques permettent d'améliorer la sécurité en ligne, comme utiliser des mots de passe forts et éviter les réseaux non sécurisés.",
+                category: "Navigation Internet"
+            },
+            
+            // Catégorie 8: Vrai/Faux supplémentaires (6 questions)
+            {
+                question: "Le cloud computing permet de stocker des données sur Internet.",
+                type: "truefalse",
+                correct: true,
+                explanation: "Le cloud computing permet de stocker des données et d'exécuter des applications sur des serveurs distants accessibles via Internet.",
+                category: "Connaissances générales"
+            },
+            {
+                question: "Un fichier avec l'extension .exe est un fichier exécutable.",
+                type: "truefalse",
+                correct: true,
+                explanation: "Les fichiers avec l'extension .exe sont des fichiers exécutables sous Windows.",
+                category: "Connaissances générales"
+            },
+            {
+                question: "La sauvegarde régulière des données n'est pas importante.",
+                type: "truefalse",
+                correct: false,
+                explanation: "La sauvegarde régulière des données est essentielle pour éviter de les perdre en cas de panne, de virus ou d'erreur.",
+                category: "Connaissances générales"
+            },
+            {
+                question: "Un virus informatique peut endommager un ordinateur.",
+                type: "truefalse",
+                correct: true,
+                explanation: "Les virus informatiques peuvent endommager les fichiers, ralentir le système ou permettre à des tiers d'accéder à l'ordinateur.",
+                category: "Connaissances générales"
+            },
+            {
+                question: "La touche Impr écran permet de capturer l'écran.",
+                type: "truefalse",
+                correct: true,
+                explanation: "La touche Impr écran (Print Screen) permet de capturer l'écran et de le copier dans le presse-papiers.",
+                category: "Connaissances générales"
+            },
+            {
+                question: "Il est impossible de récupérer un fichier supprimé de la corbeille.",
+                type: "truefalse",
+                correct: false,
+                explanation: "Il existe des logiciels de récupération de données qui peuvent parfois récupérer des fichiers supprimés, même de la corbeille.",
+                category: "Connaissances générales"
+            }
+        ];
+
+        // Variables globales
+        let timeLeft = 40 * 60; // 40 minutes en secondes
+        let timerInterval;
+        let currentQuestion = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let quizCompleted = false;
+        let finalScore = 0;
+
+        // Initialisation d'EmailJS avec vos identifiants
+        (function() {
+            emailjs.init("YMTz-Vh3e5tP1iCkq");
+            console.log("EmailJS initialisé");
+        })();
+
+        // Fonction pour valider l'email
+        function validateEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+        // Fonction pour démarrer le chronomètre
+        function startTimer() {
+            timerInterval = setInterval(function() {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                // Mettre à jour la barre de progression
+                const progressPercentage = ((40 * 60 - timeLeft) / (40 * 60)) * 100;
+                document.getElementById('progress').style.width = progressPercentage + '%';
+                
+                // Changer la couleur quand il reste peu de temps
+                if (timeLeft <= 300) { // 5 minutes
+                    document.getElementById('timer').classList.add('time-warning');
+                }
+                
+                // Arrêter le quiz quand le temps est écoulé
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        // Fonction pour mettre à jour l'affichage du chronomètre
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            
+            const formattedTime = 
+                String(minutes).padStart(2, '0') + ':' + 
+                String(seconds).padStart(2, '0');
+            
+            document.getElementById('timer').textContent = formattedTime;
+        }
+
+        // Fonction pour afficher la question actuelle
+        function displayQuestion() {
+            const quizContent = document.getElementById('quiz-content');
+            quizContent.innerHTML = '';
+            
+            const question = questions[currentQuestion];
+            
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-container';
+            
+            // Ajouter le compteur de questions
+            const questionCounter = document.createElement('div');
+            questionCounter.className = 'question-counter';
+            questionCounter.innerHTML = `
+                <span>Question ${currentQuestion + 1} sur ${questions.length}</span>
+                <span>${questions.length - currentQuestion - 1} questions restantes</span>
+            `;
+            questionDiv.appendChild(questionCounter);
+            
+            const questionNumber = document.createElement('div');
+            questionNumber.className = 'question-number';
+            questionNumber.innerHTML = `<i class="fas fa-question-circle"></i> ${question.type === "truefalse" ? "Vrai ou Faux" : question.type === "multiple" ? "Choix multiples" : "Choix unique"}`;
+            
+            const questionText = document.createElement('div');
+            questionText.className = 'question-text';
+            questionText.textContent = question.question;
+            
+            questionDiv.appendChild(questionNumber);
+            questionDiv.appendChild(questionText);
+            
+            // Afficher les options en fonction du type de question
+            if (question.type === "truefalse") {
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'true-false-options';
+                
+                const trueOption = document.createElement('div');
+                trueOption.className = `true-false-option ${userAnswers[currentQuestion] === true ? 'selected' : ''}`;
+                trueOption.textContent = "Vrai";
+                trueOption.addEventListener('click', function() {
+                    userAnswers[currentQuestion] = true;
+                    document.querySelectorAll('.true-false-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    trueOption.classList.add('selected');
+                });
+                
+                const falseOption = document.createElement('div');
+                falseOption.className = `true-false-option ${userAnswers[currentQuestion] === false ? 'selected' : ''}`;
+                falseOption.textContent = "Faux";
+                falseOption.addEventListener('click', function() {
+                    userAnswers[currentQuestion] = false;
+                    document.querySelectorAll('.true-false-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    falseOption.classList.add('selected');
+                });
+                
+                optionsDiv.appendChild(trueOption);
+                optionsDiv.appendChild(falseOption);
+                questionDiv.appendChild(optionsDiv);
+            } else {
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'options';
+                
+                question.options.forEach((option, optionIndex) => {
+                    const optionLabel = document.createElement('label');
+                    optionLabel.className = 'option';
+                    
+                    // Pour les questions à choix multiples, vérifier si cette option est sélectionnée
+                    if (question.type === "multiple") {
+                        if (userAnswers[currentQuestion] && userAnswers[currentQuestion].includes(optionIndex)) {
+                            optionLabel.classList.add('selected');
+                        }
+                    } else if (userAnswers[currentQuestion] === optionIndex) {
+                        optionLabel.classList.add('selected');
+                    }
+                    
+                    const optionInput = document.createElement('input');
+                    optionInput.type = question.type === "multiple" ? 'checkbox' : 'radio';
+                    optionInput.name = `question-${currentQuestion}`;
+                    optionInput.value = optionIndex;
+                    
+                    if (question.type === "multiple") {
+                        optionInput.checked = userAnswers[currentQuestion] && userAnswers[currentQuestion].includes(optionIndex);
+                    } else {
+                        optionInput.checked = userAnswers[currentQuestion] === optionIndex;
+                    }
+                    
+                    optionInput.addEventListener('change', function() {
+                        if (question.type === "multiple") {
+                            if (!userAnswers[currentQuestion]) {
+                                userAnswers[currentQuestion] = [];
+                            }
+                            
+                            if (this.checked) {
+                                userAnswers[currentQuestion].push(parseInt(this.value));
+                            } else {
+                                const index = userAnswers[currentQuestion].indexOf(parseInt(this.value));
+                                if (index !== -1) {
+                                    userAnswers[currentQuestion].splice(index, 1);
+                                }
+                            }
+                        } else {
+                            // Pour les questions à choix unique, désélectionner toutes les autres options
+                            userAnswers[currentQuestion] = parseInt(this.value);
+                            document.querySelectorAll(`input[name="question-${currentQuestion}"]`).forEach(input => {
+                                input.parentElement.classList.remove('selected');
+                            });
+                        }
+                        
+                        optionLabel.classList.add('selected');
+                    });
+                    
+                    optionLabel.appendChild(optionInput);
+                    optionLabel.appendChild(document.createTextNode(option));
+                    
+                    optionsDiv.appendChild(optionLabel);
+                });
+                
+                questionDiv.appendChild(optionsDiv);
+            }
+            
+            quizContent.appendChild(questionDiv);
+            
+            // Mettre à jour les boutons de navigation
+            updateNavigationButtons();
+        }
+
+        // Fonction pour mettre à jour les boutons de navigation
+        function updateNavigationButtons() {
+            document.getElementById('next-btn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+        }
+
+        // Fonction pour passer à la question suivante
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        // Fonction pour vérifier si une réponse est correcte
+        function isAnswerCorrect(question, userAnswer) {
+            if (question.type === "truefalse") {
+                return userAnswer === question.correct;
+            } else if (question.type === "multiple") {
+                if (!userAnswer || userAnswer.length !== question.correct.length) {
+                    return false;
+                }
+                
+                for (let i = 0; i < question.correct.length; i++) {
+                    if (!userAnswer.includes(question.correct[i])) {
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                return userAnswer === question.correct;
+            }
+        }
+
+        // Fonction pour soumettre le quiz
+        function submitQuiz() {
+            if (quizCompleted) return;
+            
+            clearInterval(timerInterval);
+            quizCompleted = true;
+            
+            finalScore = 0;
+            const totalQuestions = questions.length;
+            
+            // Calculer le score
+            questions.forEach((q, index) => {
+                if (isAnswerCorrect(q, userAnswers[index])) {
+                    finalScore++;
+                }
+            });
+            
+            // Afficher le message de fin et le formulaire d'email
+            showCompletionMessage();
+        }
+
+        // Fonction pour afficher le message de fin et le formulaire d'email
+        function showCompletionMessage() {
+            document.getElementById('quiz-content').style.display = 'none';
+            document.querySelector('.controls').style.display = 'none';
+            document.querySelector('.timer-container').style.display = 'none';
+            document.getElementById('completion-message').style.display = 'block';
+            document.getElementById('email-form').style.display = 'block';
+        }
+
+        // Fonction pour formater la réponse de l'utilisateur pour l'affichage
+        function formatUserAnswer(question, userAnswer) {
+            if (userAnswer === null) {
+                return "Non répondu";
+            }
+            
+            if (question.type === "truefalse") {
+                return userAnswer ? "Vrai" : "Faux";
+            } else if (question.type === "multiple") {
+                return userAnswer.map(i => question.options[i]).join(", ");
+            } else {
+                return question.options[userAnswer];
+            }
+        }
+
+        // Fonction pour formater la bonne réponse pour l'affichage
+        function formatCorrectAnswer(question) {
+            if (question.type === "truefalse") {
+                return question.correct ? "Vrai" : "Faux";
+            } else if (question.type === "multiple") {
+                return question.correct.map(i => question.options[i]).join(", ");
+            } else {
+                return question.options[question.correct];
+            }
+        }
+
+        // Fonction pour générer le contenu des résultats
+        function generateResultsContent(firstName, lastName) {
+            // Calculer le score pourcentage
+            const scorePercentage = Math.round((finalScore / questions.length) * 100);
+            
+            // Déterminer le message en fonction du score
+            let message = "";
+            if (scorePercentage >= 80) {
+                message = "Excellent ! Vous maîtrisez bien l'informatique bureautique.";
+            } else if (scorePercentage >= 60) {
+                message = "Bon travail ! Vous avez de bonnes connaissances en informatique.";
+            } else if (scorePercentage >= 40) {
+                message = "Pas mal ! Continuez à vous exercer pour améliorer vos compétences.";
+            } else {
+                message = "Il faut revoir quelques notions. Ne vous découragez pas !";
+            }
+            
+            // Grouper les questions par catégorie
+            const questionsByCategory = {};
+            questions.forEach((q, index) => {
+                if (!questionsByCategory[q.category]) {
+                    questionsByCategory[q.category] = [];
+                }
+                questionsByCategory[q.category].push({...q, index});
+            });
+            
+            // Préparer le contenu de l'email avec tableau organisé par catégorie
+            let emailBody = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="https://i.ibb.co/hFJm4Lx2/logo-hallal.png" alt="Logo HALLAL SERVICES TECH" style="max-width: 200px; height: auto;">
+                </div>
+                <h2 style="text-align: center; color: #4a6fa5;">Résultats du quiz d'informatique bureautique</h2>
+                <h3 style="text-align: center; color: #2c3e50;">HALLAL SERVICES TECH</h3>
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p><strong>Participant:</strong> ${firstName} ${lastName}</p>
+                    <p><strong>Score:</strong> ${finalScore}/${questions.length} (${scorePercentage}%)</p>
+                    <p><strong>Commentaire:</strong> ${message}</p>
+                </div>
+                <h3 style="color: #4a6fa5; border-bottom: 2px solid #4a6fa5; padding-bottom: 5px;">Correction détaillée</h3>
+            `;
+            
+            // Générer le tableau par catégorie
+            for (const category in questionsByCategory) {
+                emailBody += `<h4 style="color: #4a6fa5; margin-top: 25px; margin-bottom: 10px; font-weight: bold;">${category}</h4>`;
+                emailBody += `
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+                        <thead>
+                            <tr style="background-color: #4a6fa5; color: white;">
+                                <th style="padding: 12px; border: 1px solid #ddd; text-align: left; width: 5%;">N°</th>
+                                <th style="padding: 12px; border: 1px solid #ddd; text-align: left; width: 25%;">Question</th>
+                                <th style="padding: 12px; border: 1px solid #ddd; text-align: left; width: 20%;">Votre réponse</th>
+                                <th style="padding: 12px; border: 1px solid #ddd; text-align: left; width: 20%;">Bonne réponse</th>
+                                <th style="padding: 12px; border: 1px solid #ddd; text-align: left; width: 20%;">Explication</th>
+                                <th style="padding: 12px; border: 1px solid #ddd; text-align: left; width: 10%;">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                questionsByCategory[category].forEach(q => {
+                    const questionIndex = q.index;
+                    const isCorrect = isAnswerCorrect(q, userAnswers[questionIndex]);
+                    const userAnswerFormatted = formatUserAnswer(q, userAnswers[questionIndex]);
+                    const correctAnswerFormatted = formatCorrectAnswer(q);
+                    
+                    emailBody += `<tr style="${isCorrect ? 'background-color: #e8f5e9;' : 'background-color: #ffeaea;'}">`;
+                    emailBody += `<td style="padding: 12px; border: 1px solid #ddd;">${questionIndex + 1}</td>`;
+                    emailBody += `<td style="padding: 12px; border: 1px solid #ddd;">${q.question}</td>`;
+                    emailBody += `<td style="padding: 12px; border: 1px solid #ddd;">${userAnswerFormatted}</td>`;
+                    emailBody += `<td style="padding: 12px; border: 1px solid #ddd;">${correctAnswerFormatted}</td>`;
+                    emailBody += `<td style="padding: 12px; border: 1px solid #ddd;">${q.explanation}</td>`;
+                    emailBody += `<td style="padding: 12px; border: 1px solid #ddd; color: ${isCorrect ? '#28a745' : '#e74c3c'}; font-weight: bold;">${isCorrect ? "Correct" : "Incorrect"}</td>`;
+                    emailBody += `</tr>`;
+                });
+                
+                emailBody += `</tbody></table>`;
+            }
+            
+            return {
+                emailBody: emailBody,
+                scorePercentage: scorePercentage,
+                message: message
+            };
+        }
+
+        // Fonction pour envoyer les résultats par email avec EmailJS
+        function sendResultsByEmail() {
+            const userEmail = document.getElementById('user-email').value.trim();
+            const userFirstName = document.getElementById('user-firstname').value.trim();
+            const userLastName = document.getElementById('user-lastname').value.trim();
+            
+            // Validation des champs
+            let hasError = false;
+            
+            if (!userFirstName) {
+                document.getElementById('firstname-validation').style.display = 'block';
+                hasError = true;
+            } else {
+                document.getElementById('firstname-validation').style.display = 'none';
+            }
+            
+            if (!userLastName) {
+                document.getElementById('lastname-validation').style.display = 'block';
+                hasError = true;
+            } else {
+                document.getElementById('lastname-validation').style.display = 'none';
+            }
+            
+            if (!userEmail) {
+                document.getElementById('email-validation').textContent = "Veuillez entrer votre adresse email";
+                document.getElementById('email-validation').style.display = 'block';
+                hasError = true;
+            } else if (!validateEmail(userEmail)) {
+                document.getElementById('email-validation').textContent = "Veuillez entrer une adresse email valide";
+                document.getElementById('email-validation').style.display = 'block';
+                hasError = true;
+            } else {
+                document.getElementById('email-validation').style.display = 'none';
+            }
+            
+            if (hasError) {
+                return;
+            }
+            
+            // Afficher le message d'envoi en cours
+            document.getElementById('sending-message').style.display = 'block';
+            document.getElementById('success-message').style.display = 'none';
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('fallback-message').style.display = 'none';
+            
+            // Générer le contenu des résultats
+            const results = generateResultsContent(userFirstName, userLastName);
+            
+            // Préparer le texte pour la solution de secours
+            const resultsText = `Résultats du quiz HALLAL SERVICES TECH
+Participant: ${userFirstName} ${userLastName}
+Score: ${finalScore}/${questions.length} (${results.scorePercentage}%)
+Commentaire: ${results.message}
+
+Correction détaillée:
+${questions.map((q, index) => {
+    let text = `Question ${index+1}: ${q.question}\n`;
+    text += `Votre réponse: ${formatUserAnswer(q, userAnswers[index])}\n`;
+    text += `Bonne réponse: ${formatCorrectAnswer(q)}\n`;
+    text += `Explication: ${q.explanation}\n`;
+    text += `Statut: ${isAnswerCorrect(q, userAnswers[index]) ? "Correct" : "Incorrect"}\n\n`;
+    return text;
+}).join('')}`;
+            
+            // Remplir la zone de texte de secours
+            document.getElementById('results-text').value = resultsText;
+            
+            // Paramètres pour EmailJS
+            const templateParams = {
+                to_email: userEmail,
+                user_email: userEmail,
+                email: userEmail,
+                first_name: userFirstName,
+                last_name: userLastName,
+                full_name: `${userFirstName} ${userLastName}`,
+                from_name: "HALLAL SERVICES TECH",
+                subject: "Résultats de votre quiz d'informatique bureautique",
+                message: results.emailBody,
+                score: `${finalScore}/${questions.length} (${results.scorePercentage}%)`,
+                user_name: `${userFirstName} ${userLastName}`,
+                reply_to: "noreply@hallalservicestech.com"
+            };
+            
+            console.log("Envoi à l'adresse:", userEmail);
+            console.log("Paramètres:", templateParams);
+            
+            // Envoyer l'email avec EmailJS
+            emailjs.send('service_kr9jlo9', 'template_19nxulk', templateParams)
+                .then(function(response) {
+                    console.log('SUCCESS!', response.status, response.text);
+                    
+                    // Afficher le message de succès
+                    document.getElementById('sending-message').style.display = 'none';
+                    document.getElementById('success-message').style.display = 'block';
+                    document.getElementById('error-message').style.display = 'none';
+                    document.getElementById('fallback-message').style.display = 'none';
+                    
+                    // Mettre à jour le message de fin
+                    document.getElementById('completion-message').innerHTML = `
+                        <div class="completion-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="completion-text">
+                            Résultats envoyés avec succès !
+                        </div>
+                        <p>Vos résultats et la correction complète ont été envoyés à ${userEmail}. Vérifiez votre boîte de réception.</p>
+                    `;
+                    
+                    // Cacher le formulaire d'email
+                    setTimeout(() => {
+                        document.getElementById('email-form').style.display = 'none';
+                    }, 3000);
+                }, function(error) {
+                    console.log('FAILED...', error);
+                    
+                    // Afficher le message d'erreur et la solution de secours
+                    document.getElementById('sending-message').style.display = 'none';
+                    document.getElementById('success-message').style.display = 'none';
+                    document.getElementById('error-message').style.display = 'block';
+                    document.getElementById('fallback-message').style.display = 'block';
+                    
+                    // Afficher une alerte avec plus de détails
+                    alert("Une erreur s'est produite lors de l'envoi. Veuillez utiliser l'option de copie manuelle ci-dessous. Détails: " + error.text);
+                });
+        }
+
+        // Fonction pour copier les résultats dans le presse-papier
+        function copyResultsToClipboard() {
+            const resultsTextarea = document.getElementById('results-text');
+            resultsTextarea.select();
+            resultsTextarea.setSelectionRange(0, 99999); // Pour les mobiles
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert('Résultats copiés dans le presse-papier ! Vous pouvez maintenant les coller dans un email.');
+                } else {
+                    alert('Échec de la copie. Veuillez sélectionner et copier manuellement le texte.');
+                }
+            } catch (err) {
+                console.error('Erreur lors de la copie: ', err);
+                alert('Échec de la copie. Veuillez sélectionner et copier manuellement le texte.');
+            }
+        }
+
+        // Fonction pour recommencer le quiz
+        function restartQuiz() {
+            timeLeft = 40 * 60;
+            currentQuestion = 0;
+            userAnswers = new Array(questions.length).fill(null);
+            quizCompleted = false;
+            finalScore = 0;
+            
+            document.getElementById('quiz-content').style.display = 'block';
+            document.querySelector('.controls').style.display = 'flex';
+            document.querySelector('.timer-container').style.display = 'flex';
+            document.getElementById('completion-message').style.display = 'none';
+            document.getElementById('email-form').style.display = 'none';
+            document.getElementById('timer').classList.remove('time-warning');
+            document.getElementById('user-email').value = '';
+            document.getElementById('user-firstname').value = '';
+            document.getElementById('user-lastname').value = '';
+            
+            // Cacher les messages d'état d'envoi
+            document.getElementById('sending-message').style.display = 'none';
+            document.getElementById('success-message').style.display = 'none';
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('fallback-message').style.display = 'none';
+            document.getElementById('email-validation').style.display = 'none';
+            document.getElementById('firstname-validation').style.display = 'none';
+            document.getElementById('lastname-validation').style.display = 'none';
+            
+            // Réinitialiser le message de fin
+            document.getElementById('completion-message').innerHTML = `
+                <div class="completion-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="completion-text">
+                    Quiz terminé ! Vos résultats seront envoyés par email.
+                </div>
+                <p>Merci d'avoir participé au quiz. Veuillez entrer vos coordonnées ci-dessous pour recevoir vos résultats et la correction complète.</p>
+            `;
+            
+            updateTimerDisplay();
+            displayQuestion();
+            startTimer();
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            displayQuestion();
+            updateTimerDisplay();
+            startTimer();
+            
+            // Gestionnaires d'événements pour les boutons
+            document.getElementById('next-btn').addEventListener('click', nextQuestion);
+            document.getElementById('terminer-btn').addEventListener('click', function() {
+                if (confirm("Êtes-vous sûr de vouloir terminer le quiz maintenant ?")) {
+                    submitQuiz();
+                }
+            });
+            document.getElementById('send-email-btn').addEventListener('click', sendResultsByEmail);
+            document.getElementById('restart-btn').addEventListener('click', restartQuiz);
+            document.getElementById('copy-results-btn').addEventListener('click', copyResultsToClipboard);
+            
+            // Validation de l'email en temps réel
+            document.getElementById('user-email').addEventListener('input', function() {
+                const email = this.value.trim();
+                if (email && !validateEmail(email)) {
+                    document.getElementById('email-validation').textContent = "Veuillez entrer une adresse email valide";
+                    document.getElementById('email-validation').style.display = 'block';
+                } else {
+                    document.getElementById('email-validation').style.display = 'none';
+                }
+            });
+            
+            // Validation du prénom en temps réel
+            document.getElementById('user-firstname').addEventListener('input', function() {
+                const firstName = this.value.trim();
+                if (!firstName) {
+                    document.getElementById('firstname-validation').style.display = 'block';
+                } else {
+                    document.getElementById('firstname-validation').style.display = 'none';
+                }
+            });
+            
+            // Validation du nom en temps réel
+            document.getElementById('user-lastname').addEventListener('input', function() {
+                const lastName = this.value.trim();
+                if (!lastName) {
+                    document.getElementById('lastname-validation').style.display = 'block';
+                } else {
+                    document.getElementById('lastname-validation').style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
